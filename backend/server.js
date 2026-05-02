@@ -8,6 +8,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import sampleRoutes from "./routes/sampleRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
+import assistantRoutes from "./routes/assistantRoutes.js";
 
 // Load environment variables
 dotenv.config();
@@ -45,6 +46,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/samples", sampleRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api", assistantRoutes);
 
 // 404 handler
 app.use((req, res) => {

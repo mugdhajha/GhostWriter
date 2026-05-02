@@ -2,22 +2,28 @@
 // Handles AI generation requests — thin controller, logic lives in aiService
 
 import { generateReply } from "../services/aiService.js";
+import HistoryEntry from "../models/HistoryEntry.js";
 
 /**
  * POST /api/ai/generate
  * Generates an AI reply that mimics the user's writing style
- * Body: { message: string, tone: string }
+ * Body: { user_prompt: string, tone: string, content_type: string }
+ * Back-compat: also accepts { message: string, tone: string }
  */
 const generate = async (req, res) => {
   try {
-    const { message, tone } = req.body;
+    const { message, user_prompt, tone, content_type } = req.body;
+    const userPrompt = (user_prompt ?? message ?? "").toString();
+    const contentType = (content_type ?? req.body.contentType ?? "general").toString();
 
     // Validate inputs
-    if (!message || !tone) {
-      return res.status(400).json({ error: "Both 'message' and 'tone' are required." });
+    if (!userPrompt || !tone) {
+      return res
+        .status(400)
+        .json({ error: "Both 'user_prompt' (or 'message') and 'tone' are required." });
     }
 
-    if (message.trim().length < 2) {
+    if (userPrompt.trim().length < 2) {
       return res.status(400).json({ error: "Message is too short." });
     }
 
@@ -26,12 +32,34 @@ const generate = async (req, res) => {
       return res.status(400).json({ error: `Tone must be one of: ${validTones.join(", ")}` });
     }
 
+    const validTypes = ["email", "message", "blog", "general"];
+    const normalizedType = contentType.trim().toLowerCase();
+    if (!validTypes.includes(normalizedType)) {
+      return res
+        .status(400)
+        .json({ error: `content_type must be one of: ${validTypes.join(", ")}` });
+    }
+
     // Delegate to service layer
-    const reply = await generateReply(req.user._id, message.trim(), tone);
+    const reply = await generateReply(req.user._id, userPrompt.trim(), tone, normalizedType);
+
+    // Save to history (best-effort; do not fail the request if history write fails)
+    try {
+      await HistoryEntry.create({
+        userId: req.user._id,
+        prompt: userPrompt.trim(),
+        output: reply,
+        tone,
+        contentType: normalizedType,
+      });
+    } catch (historyErr) {
+      console.error("History save error:", historyErr.message);
+    }
 
     res.status(200).json({
       reply,
       tone,
+      content_type: normalizedType,
     });
   } catch (error) {
     console.error("AI generate error:", error.message);

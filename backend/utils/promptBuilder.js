@@ -19,14 +19,22 @@ const formatSamples = (samples) => {
 /**
  * Builds the complete prompt for GhostWriter++
  * @param {Array} samples - User's writing samples
- * @param {string} inputMessage - The message to reply to
- * @param {string} tone - Requested tone for the reply
+ * @param {string} userPrompt - The user's input
+ * @param {string} tone - Requested tone for the output
+ * @param {string} contentType - Type of content to generate
  * @returns {string} - Complete prompt string
  */
-const buildPrompt = (samples, inputMessage, tone) => {
+const buildPrompt = (samples, userPrompt, tone, contentType = "general") => {
   const formattedSamples = formatSamples(samples);
 
-  const prompt = `You are an advanced AI system designed to replicate a specific user's writing style with extremely high fidelity.
+  const normalizedType = String(contentType || "general").toLowerCase();
+  const emailFormat =
+    normalizedType === "email"
+      ? `\n\nIf content_type is 'email', format as:\nSubject:\nGreeting:\nBody:\nClosing:`
+      : "";
+
+  const prompt = `You are a professional AI writing assistant.
+You are also an advanced AI system designed to replicate a specific user's writing style with extremely high fidelity.
 Your primary objective is to generate text that is indistinguishable from the user's natural writing.
 You MUST prioritize stylistic imitation over grammatical correctness.
 
@@ -54,8 +62,9 @@ USER WRITING SAMPLES:
 ${formattedSamples}
 
 INPUT CONTEXT
-Incoming message: ${inputMessage}
+User input: ${userPrompt}
 Requested tone: ${tone}
+Requested content_type: ${normalizedType}
 
 STYLE MATCHING LOGIC
 - Prioritize samples with matching tone: ${tone}
@@ -76,10 +85,17 @@ You must NOT:
 - Break character
 
 FINAL TASK
-Generate a reply to the incoming message that:
-- Feels like it was written by the SAME person
-- Matches the requested tone: ${tone}
-- Maintains natural conversational flow
+Task: Generate a ${normalizedType}.
+
+Tone: ${tone}
+
+Requirements:
+* Maintain clarity and proper structure
+* Adapt tone correctly
+* Avoid generic phrases
+${emailFormat}
+
+Return only the final content.
 
 OUTPUT FORMAT
 Return ONLY the final reply text. No explanations. No metadata. No preamble.`;
