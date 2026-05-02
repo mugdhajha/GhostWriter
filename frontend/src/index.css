@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-cream-100 text-ink-900 font-body;
+    background-image: 
+      radial-gradient(ellipse at 20% 50%, rgba(196, 98, 45, 0.04) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(74, 50, 48, 0.04) 0%, transparent 50%);
+    min-height: 100vh;
+  }
+
+  * {
+    @apply transition-colors duration-150;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-accent text-cream-100 font-body font-medium px-7 py-3 rounded-md shadow-md
+           hover:bg-accent-hover active:scale-95 transition-all duration-150
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+
+  .btn-ghost {
+    @apply text-ink-600 hover:text-ink-900 font-body font-medium px-4 py-2 rounded
+           hover:bg-ink-100 transition-all duration-150;
+  }
+
+  .input-field {
+    @apply w-full bg-cream-50/80 border border-cream-400 rounded-md px-4 py-2.5
+           font-body text-ink-900 placeholder-ink-500 placeholder:opacity-90
+           focus:outline-none focus:border-ink-500 focus:ring-1 focus:ring-ink-200
+           transition-all duration-150;
+  }
+
+  .card {
+    @apply bg-cream-100 border border-cream-400 rounded-2xl shadow-xl ring-1 ring-cream-200/60;
+    background-image: url("/paper-texture.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .navbar-paper {
+    @apply border-b border-cream-400 bg-cream-50/90;
+    background-image: url("/paper-texture.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .paper-surface {
+    background-image: url("/paper-texture.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .ruled-textarea {
+    @apply w-full min-h-40 px-5 py-4 rounded-md font-body text-base text-ink-900 resize-none
+           bg-cream-50/80 border border-cream-400 border-l-2 border-l-accent/50
+           placeholder-ink-500 placeholder:opacity-90
+           focus:outline-none focus:border-ink-500 focus:ring-1 focus:ring-ink-200;
+    line-height: 32px;
+    background-image:
+      linear-gradient(
+        to right,
+        transparent 0,
+        transparent 28px,
+        color-mix(in srgb, currentColor 12%, transparent) 29px,
+        transparent 30px
+      ),
+      repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 30px,
+        color-mix(in srgb, currentColor 8%, transparent) 31px
+      );
+    background-size: auto;
+    background-position: 0 0;
+    background-repeat: repeat;
+  }
+
+  .ruled-textarea:focus {
+    outline: none;
+  }
+
+  .section-title {
+    @apply font-display text-2xl text-ink-900 font-semibold;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-ink-600 mb-1.5;
+  }
+}
+
+/* Paper texture subtle overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d4c2b0; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #b8a090; }
