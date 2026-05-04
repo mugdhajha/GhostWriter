@@ -10,6 +10,21 @@ const historyEntrySchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+
+    // Threading
+    // A "thread" is a group of related generations/edits that belong together.
+    // For the first entry in a thread, we set threadId = _id at creation time.
+    threadId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "HistoryEntry",
+      index: true,
+    },
+    parentEntryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "HistoryEntry",
+      index: true,
+    },
+
     prompt: {
       type: String,
       required: [true, "Prompt is required"],
@@ -38,6 +53,27 @@ const historyEntrySchema = new mongoose.Schema(
         message: "contentType must be one of: email, message, blog, general",
       },
       default: "general",
+    },
+
+    // Persisted evaluation for this output (optional)
+    analysis: {
+      professionalism: { type: Number },
+      clarity: { type: Number },
+      tone: { type: String },
+      suggestions: { type: [String], default: undefined },
+      analyzedAt: { type: Date },
+    },
+
+    // User-initiated improvement requests for this output (optional)
+    improvementNotes: {
+      type: [
+        {
+          instruction: { type: String, trim: true },
+          improvedEntryId: { type: mongoose.Schema.Types.ObjectId, ref: "HistoryEntry" },
+          createdAt: { type: Date, default: Date.now },
+        },
+      ],
+      default: undefined,
     },
   },
   { timestamps: true }

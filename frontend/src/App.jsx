@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
+import History from "./pages/History";
 
 const App = () => {
   return (
@@ -35,6 +36,15 @@ const App = () => {
                 element={
                   <ProtectedRoute>
                     <Profile />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/history"
+                element={
+                  <ProtectedRoute>
+                    <History />
                   </ProtectedRoute>
                 }
               />

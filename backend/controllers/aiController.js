@@ -12,9 +12,11 @@ import HistoryEntry from "../models/HistoryEntry.js";
  */
 const generate = async (req, res) => {
   try {
-    const { message, user_prompt, tone, content_type } = req.body;
+    const { message, user_prompt, tone, content_type, thread_id, parent_entry_id } = req.body;
     const userPrompt = (user_prompt ?? message ?? "").toString();
     const contentType = (content_type ?? req.body.contentType ?? "general").toString();
+    const threadId = (thread_id ?? req.body.threadId ?? "").toString().trim();
+    const parentEntryId = (parent_entry_id ?? req.body.parentEntryId ?? "").toString().trim();
 
     // Validate inputs
     if (!userPrompt || !tone) {
@@ -44,14 +46,22 @@ const generate = async (req, res) => {
     const reply = await generateReply(req.user._id, userPrompt.trim(), tone, normalizedType);
 
     // Save to history (best-effort; do not fail the request if history write fails)
+    let savedEntry = null;
     try {
-      await HistoryEntry.create({
+      const entry = new HistoryEntry({
         userId: req.user._id,
         prompt: userPrompt.trim(),
         output: reply,
         tone,
         contentType: normalizedType,
+        parentEntryId: parentEntryId || undefined,
       });
+
+      // First entry in a thread: threadId = _id.
+      // Otherwise: use provided threadId.
+      entry.threadId = threadId || entry._id;
+
+      savedEntry = await entry.save();
     } catch (historyErr) {
       console.error("History save error:", historyErr.message);
     }
@@ -60,6 +70,19 @@ const generate = async (req, res) => {
       reply,
       tone,
       content_type: normalizedType,
+      historyEntry: savedEntry
+        ? {
+            _id: savedEntry._id,
+            threadId: savedEntry.threadId,
+            parentEntryId: savedEntry.parentEntryId,
+            prompt: savedEntry.prompt,
+            output: savedEntry.output,
+            tone: savedEntry.tone,
+            contentType: savedEntry.contentType,
+            analysis: savedEntry.analysis,
+            createdAt: savedEntry.createdAt,
+          }
+        : null,
     });
   } catch (error) {
     console.error("AI generate error:", error.message);

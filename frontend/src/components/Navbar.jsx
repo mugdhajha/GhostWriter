@@ -39,6 +39,17 @@ const Navbar = () => {
           >
             Generate
           </Link>
+
+          <Link
+            to="/history"
+            className={`px-4 py-1.5 rounded text-sm font-medium transition-all ${
+              isActive("/history")
+                ? "bg-ink-100 text-ink-800"
+                : "text-ink-500 hover:text-ink-800 hover:bg-cream-200"
+            }`}
+          >
+            History
+          </Link>
           <Link
             to="/profile"
             className={`px-4 py-1.5 rounded text-sm font-medium transition-all ${
