@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import { AnimatePresence, motion } from "framer-motion";
 import api from "../services/api";
 
 const TONES = ["casual", "formal", "professional", "informal", "humorous"];
@@ -238,8 +238,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen">
-      <Navbar />
-
       <main className="px-6 py-16">
         <div className="max-w-3xl mx-auto">
           {/* Input section */}
@@ -289,10 +287,12 @@ const Dashboard = () => {
               </div>
 
               <div className="pt-6">
-                <button
+                <motion.button
                   onClick={handleGenerate}
                   disabled={loading}
                   className="btn-primary whitespace-nowrap"
+                  whileHover={!loading ? { scale: 1.01 } : undefined}
+                  whileTap={!loading ? { scale: 0.98 } : undefined}
                 >
                   {loading ? (
                     <span className="flex items-center gap-2">
@@ -305,7 +305,7 @@ const Dashboard = () => {
                   ) : (
                     "Inscribe"
                   )}
-                </button>
+                </motion.button>
               </div>
             </div>
           </div>
@@ -326,7 +326,12 @@ const Dashboard = () => {
         )}
 
         {(threadLoading || threadEntries.length > 0) && (
-          <div className="card p-6">
+          <motion.div
+            className="card p-6"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+          >
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-display text-lg text-ink-800 font-semibold">Thread</h2>
               <span className="text-xs font-mono text-ink-500">
@@ -337,8 +342,9 @@ const Dashboard = () => {
             {threadEntries.length === 0 ? (
               <p className="text-sm text-ink-600">No entries yet.</p>
             ) : (
-              <div className="space-y-4">
-                {threadEntries.map((entry, idx) => {
+              <motion.div className="space-y-4" layout>
+                <AnimatePresence initial={false}>
+                  {threadEntries.map((entry, idx) => {
                   const entryId = entry._id;
                   const analysis = entry.analysis;
                   const analysisLoading = Boolean(analysisLoadingById[entryId]);
@@ -347,7 +353,15 @@ const Dashboard = () => {
                   const improveLoading = Boolean(improveLoadingById[entryId]);
 
                   return (
-                    <div key={entryId} className="border border-cream-300 rounded-lg bg-cream-50/70">
+                    <motion.div
+                      key={entryId}
+                      layout
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.2, ease: "easeOut" }}
+                      className="border border-cream-300 rounded-lg bg-cream-50/70"
+                    >
                       <div className="p-4">
                         <div className="flex items-start justify-between gap-4">
                           <div className="min-w-0">
@@ -429,14 +443,16 @@ const Dashboard = () => {
                               </div>
                             </div>
                           ) : (
-                            <button
+                            <motion.button
                               type="button"
                               onClick={() => runAnalyzeForEntry(entryId, entry.output || "")}
                               disabled={analysisLoading}
                               className="btn-primary whitespace-nowrap"
+                              whileHover={!analysisLoading ? { scale: 1.01 } : undefined}
+                              whileTap={!analysisLoading ? { scale: 0.98 } : undefined}
                             >
                               {analysisLoading ? "Evaluating…" : "Evaluate this"}
-                            </button>
+                            </motion.button>
                           )}
                         </div>
 
@@ -453,23 +469,26 @@ const Dashboard = () => {
                             }
                           />
                           <div className="mt-3">
-                            <button
+                            <motion.button
                               type="button"
                               onClick={() => handleImproveEntry(entry)}
                               disabled={improveLoading || !improveText.trim()}
                               className="btn-primary whitespace-nowrap"
+                              whileHover={!(improveLoading || !improveText.trim()) ? { scale: 1.01 } : undefined}
+                              whileTap={!(improveLoading || !improveText.trim()) ? { scale: 0.98 } : undefined}
                             >
                               {improveLoading ? "Improving…" : "Improve and keep in thread"}
-                            </button>
+                            </motion.button>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   );
-                })}
-              </div>
+                  })}
+                </AnimatePresence>
+              </motion.div>
             )}
-          </div>
+          </motion.div>
         )}
 
         {/* Empty state hint */}

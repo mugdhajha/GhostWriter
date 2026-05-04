@@ -1,7 +1,6 @@
 // pages/Profile.jsx
 
 import React, { useState, useEffect, useCallback } from "react";
-import Navbar from "../components/Navbar";
 import api from "../services/api";
 
 const TONES = ["casual", "formal", "professional", "informal", "humorous"];
@@ -82,8 +81,6 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen">
-      <Navbar />
-
       <main className="max-w-3xl mx-auto px-6 py-12">
         {/* Header */}
         <div className="mb-10">

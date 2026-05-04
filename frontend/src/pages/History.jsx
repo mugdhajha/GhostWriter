@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import { AnimatePresence, motion } from "framer-motion";
 import api from "../services/api";
 
 const History = () => {
@@ -75,8 +75,6 @@ const History = () => {
 
   return (
     <div className="min-h-screen">
-      <Navbar />
-
       <main className="px-6 py-16">
         <div className="max-w-3xl mx-auto">
           <div className="card p-6">
@@ -98,12 +96,19 @@ const History = () => {
             ) : threads.length === 0 ? (
               <p className="text-sm text-ink-600">No drafts yet.</p>
             ) : (
-              <div className="space-y-3">
+              <motion.div className="space-y-3" layout>
                 {threads.map((t) => {
                   const isOpen = openThreadId === t.threadId;
                   const last = t.last;
                   return (
-                    <div key={t.threadId} className="border border-cream-300 rounded-lg bg-cream-50/70">
+                    <motion.div
+                      key={t.threadId}
+                      layout
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2, ease: "easeOut" }}
+                      className="border border-cream-300 rounded-lg bg-cream-50/70"
+                    >
                       <button
                         type="button"
                         onClick={() => setOpenThreadId(isOpen ? null : t.threadId)}
@@ -124,61 +129,80 @@ const History = () => {
                         </div>
 
                         <div className="shrink-0 flex items-center gap-2">
-                          <button
+                          <motion.button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleContinue(t.threadId, last);
                             }}
                             className="text-xs text-ink-600 hover:text-ink-900 px-2 py-1 rounded hover:bg-ink-100"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
                           >
                             Continue
-                          </button>
+                          </motion.button>
                         </div>
                       </button>
 
-                      {isOpen && (
-                        <div className="px-4 pb-4">
-                          <div className="border-t border-cream-300 pt-3 space-y-3">
-                            {t.entries.map((d) => (
-                              <div key={d._id} className="border border-cream-300 rounded-lg p-3 bg-white/60">
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="min-w-0">
-                                    <div className="text-xs font-mono text-ink-500 mb-1">
-                                      {d.createdAt ? new Date(d.createdAt).toLocaleString() : ""}
+                      <AnimatePresence initial={false}>
+                        {isOpen && (
+                          <motion.div
+                            key="panel"
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2, ease: "easeOut" }}
+                            className="px-4 pb-4 overflow-hidden"
+                          >
+                            <div className="border-t border-cream-300 pt-3 space-y-3">
+                              {t.entries.map((d) => (
+                                <motion.div
+                                  key={d._id}
+                                  layout
+                                  className="border border-cream-300 rounded-lg p-3 bg-white/60"
+                                >
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                      <div className="text-xs font-mono text-ink-500 mb-1">
+                                        {d.createdAt ? new Date(d.createdAt).toLocaleString() : ""}
+                                      </div>
+                                      <div className="text-xs font-mono uppercase tracking-wider text-ink-500 mb-1">Prompt</div>
+                                      <p className="text-sm text-ink-700 whitespace-pre-wrap mb-2">{d.prompt}</p>
+                                      <div className="text-xs font-mono uppercase tracking-wider text-ink-500 mb-1">Output</div>
+                                      <p className="text-sm text-ink-700 whitespace-pre-wrap">{d.output}</p>
                                     </div>
-                                    <div className="text-xs font-mono uppercase tracking-wider text-ink-500 mb-1">Prompt</div>
-                                    <p className="text-sm text-ink-700 whitespace-pre-wrap mb-2">{d.prompt}</p>
-                                    <div className="text-xs font-mono uppercase tracking-wider text-ink-500 mb-1">Output</div>
-                                    <p className="text-sm text-ink-700 whitespace-pre-wrap">{d.output}</p>
-                                  </div>
 
-                                  <div className="shrink-0 flex flex-col items-end gap-2">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleContinue(t.threadId, d)}
-                                      className="text-xs text-ink-600 hover:text-ink-900 px-2 py-1 rounded hover:bg-ink-100"
-                                    >
-                                      Continue
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleDeleteDraft(d._id)}
-                                      className="text-xs text-ink-500 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50"
-                                    >
-                                      Delete
-                                    </button>
+                                    <div className="shrink-0 flex flex-col items-end gap-2">
+                                      <motion.button
+                                        type="button"
+                                        onClick={() => handleContinue(t.threadId, d)}
+                                        className="text-xs text-ink-600 hover:text-ink-900 px-2 py-1 rounded hover:bg-ink-100"
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                      >
+                                        Continue
+                                      </motion.button>
+                                      <motion.button
+                                        type="button"
+                                        onClick={() => handleDeleteDraft(d._id)}
+                                        className="text-xs text-ink-500 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50"
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                      >
+                                        Delete
+                                      </motion.button>
+                                    </div>
                                   </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                                </motion.div>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
                   );
                 })}
-              </div>
+              </motion.div>
             )}
           </div>
         </div>
